@@ -7,6 +7,7 @@ from unittest.mock import patch
 from console import HBNBCommand
 from io import StringIO
 import sys
+import os
 
 class TestHBNBCommand(unittest.TestCase):
     def test_quit(self):
