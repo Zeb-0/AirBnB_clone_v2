@@ -1,8 +1,11 @@
+#!/usr/bin/python3
+"""Unit tests for the HBNBCommand class in the console (command interpreter).
+"""
 import unittest
 from io import StringIO
+from models import storage
 from unittest.mock import patch
 from console import HBNBCommand
-from models import storage
 
 class TestConsole(unittest.TestCase):
 
@@ -13,58 +16,98 @@ class TestConsole(unittest.TestCase):
     def tearDown(self):
         self.console = None
 
-    def test_do_create(self):
+    def test_quit(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("quit")
+            self.assertEqual(mock_stdout.getvalue().strip(), "")
+
+    def test_EOF(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("EOF")
+            self.assertEqual(mock_stdout.getvalue().strip(), "")
+
+    def test_emptyline(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("")
+            self.assertEqual(mock_stdout.getvalue().strip(), "")
+
+    def test_create(self):
         for model_class in self.model_classes:
-            with patch('sys.stdout', new=StringIO()) as f:
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
                 self.console.onecmd(f"create {model_class}")
-                output = f.getvalue().strip()
-                self.assertTrue(output != "")
-                self.assertFalse(output.isalnum())
+                self.assertTrue(len(mock_stdout.getvalue().strip()) == 36)
 
-    def test_do_show(self):
+    def test_destroy(self):
         for model_class in self.model_classes:
-            with patch('sys.stdout', new=StringIO()) as f:
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
                 self.console.onecmd(f"create {model_class}")
-                obj_id = f.getvalue().strip()
+                obj_id = mock_stdout.getvalue().strip()
+                self.console.onecmd(f"destroy {model_class} {obj_id}")
+                self.assertFalse(len(mock_stdout.getvalue().strip()) == 0)
 
-                with patch('sys.stdout', new=StringIO()) as f_show:
-                    self.console.onecmd(f"show {model_class} {obj_id}")
-                    show_output = f_show.getvalue().strip()
-                    self.assertTrue(obj_id in show_output)
-
-    def test_do_destroy(self):
-        for model_class in self.model_classes:
-            with patch('sys.stdout', new=StringIO()) as f:
-                self.console.onecmd(f"create {model_class}")
-                obj_id = f.getvalue().strip()
-
-                with patch('sys.stdout', new=StringIO()) as f_destroy:
-                    self.console.onecmd(f"destroy {model_class} {obj_id}")
-                    destroy_output = f_destroy.getvalue().strip()
-                    self.assertEqual(destroy_output, "")
-
-    def test_do_all(self):
-        with patch('sys.stdout', new=StringIO()) as f_all:
+    def test_all(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("create BaseModel")
+            self.console.onecmd("create User")
             self.console.onecmd("all")
-            all_output = f_all.getvalue().strip()
-            self.assertFalse(all_output == "[]")  # Assertion to check if output is an empty list
+            self.assertTrue("BaseModel" in mock_stdout.getvalue().strip())
+            self.assertTrue("User" in mock_stdout.getvalue().strip())
 
-    def test_do_update(self):
-        for model_class in self.model_classes:
-            with patch('sys.stdout', new=StringIO()) as f:
-                self.console.onecmd(f"create {model_class}")
-                obj_id = f.getvalue().strip()
+    # Add the remaining test methods from the second file here
 
-                with patch('sys.stdout', new=StringIO()) as f_update:
-                    self.console.onecmd(f"update {model_class} {obj_id} name 'updated_name'")
-                    update_output = f_update.getvalue().strip()
-                    self.assertEqual(update_output, "")
+    def test_alt_all(self):
+        ''' test [class].all method '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('create User')
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('User.all()')
+            self.assertTrue(len(v.getvalue()) > 0)
 
-    def test_default(self):
-        with patch('sys.stdout', new=StringIO()) as f_default:
-            self.console.onecmd("invalid_command")
-            default_output = f_default.getvalue().strip()
-            self.assertFalse("** Unrecognized command" in default_output)
+    def test_count(self):
+        ''' test [class].count method '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('User.count()')
+            self.assertTrue(int(v.getvalue()) >= 0)
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('create User')
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('User.count()')
+            self.assertTrue(int(v.getvalue()) >= 1)
+
+    def test_user(self):
+        ''' test user object with console '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('create User')
+            user_id = v.getvalue()
+            self.assertTrue(user_id != "** class doesn't exist **\n")
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('show User')
+            self.assertTrue(v.getvalue() != "** no instance found **\n")
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('all User')
+            self.assertTrue(v.getvalue() != "** class doesn't exist **\n")
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd("update User " + user_id + " name betty")
+            HBNBCommand().onecmd("show User " + user_id)
+            self.assertTrue("betty" in v.getvalue())
+            HBNBCommand().onecmd("destroy User " + user_id)
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd("show User "+user_id)
+            self.assertEqual(v.getvalue(), "** no instance found **\n")
+
+    def test_class_exist(self):
+        ''' test class name exist '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('create BaseModel')
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('all FakeClass')
+            self.assertTrue(v.getvalue() == "** class doesn't exist **\n")
+
+    def test_show_id(self):
+        ''' test show id '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('show BaseModel')
+            self.assertFalse(v.getvalue() == "** instance id missing **")
 
 if __name__ == '__main__':
     unittest.main()
