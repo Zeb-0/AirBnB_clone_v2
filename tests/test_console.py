@@ -108,6 +108,11 @@ class TestConsole(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as v:
             HBNBCommand().onecmd('show BaseModel')
             self.assertFalse(v.getvalue() == "** instance id missing **")
-
+    
+    def test_help_show(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            with patch('builtins.input', side_effect=['help show', 'EOF']):
+                self.console.cmdloop()
+                self.assertFalse("Show command" in mock_stdout.getvalue())
 if __name__ == '__main__':
     unittest.main()
