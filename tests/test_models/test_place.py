@@ -16,7 +16,6 @@ class TestPlaceSave(unittest.TestCase):
     Unittests for testing save method of the Place class
     """
 
-    
     def setUp(self):
         try:
             os.rename("file.json", "tmp")

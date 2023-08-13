@@ -94,7 +94,6 @@ class TestCityInstantiation(unittest.TestCase):
 class TestCitySave(unittest.TestCase):
     """Defines Unittests for testing save method of the City class."""
 
-   
     def setUp(cls):
         try:
             os.rename("file.json", "tmp")
