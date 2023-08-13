@@ -87,6 +87,7 @@ class HBNBCommand(cmd.Cmd):
             if key in storage.all():
                 storage.all().pop(key)
                 storage.save()
+            B
             else:
                 print('** no instance found **')
                 return
