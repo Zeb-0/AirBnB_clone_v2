@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from time import sleep
 from models.base_model import BaseModel
 
-
 class TestBaseModelInstantiation(unittest.TestCase):
 
     def test_no_args_instantiates(self):
@@ -81,7 +80,6 @@ class TestBaseModelInstantiation(unittest.TestCase):
         self.assertEqual(bm.created_at, dt)
         self.assertEqual(bm.updated_at, dt)
 
-
 class TestBaseModelSave(unittest.TestCase):
 
     def test_one_save(self):
@@ -114,9 +112,8 @@ class TestBaseModelSave(unittest.TestCase):
         with open("file.json", "r") as f:
             self.assertIn(bmid, f.read())
 
-
 class TestBaseModelToDict(unittest.TestCase):
-
+    
     def test_to_dict_type(self):
         bm = BaseModel()
         self.assertTrue(dict, type(bm.to_dict()))
@@ -134,7 +131,6 @@ class TestBaseModelToDict(unittest.TestCase):
         bm.my_number = 98
         self.assertIn("name", bm.to_dict())
         self.assertIn("my_number", bm.to_dict())
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,7 @@ class TestUserSave(unittest.TestCase):
     Unittests for testing save method of the User class
     """
 
+   
     def setUp(self):
         try:
             os.rename("file.json", "tmp")
