@@ -95,10 +95,8 @@ class TestFileStorageMethods(unittest.TestCase):
         temp_storage = FileStorage()
         try:
             os.remove("file.json")
-        except FileNotFoundError:
+        except:
             pass
-        except Exception as e:
-            print("An error occurred:", e)
         with open("file.json", "w") as f:
             f.write("{}")
         with open("file.json", "r") as f:
