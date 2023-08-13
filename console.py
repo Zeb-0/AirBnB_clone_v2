@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""HolbertonBnB Console - Interactive Command Line Utility"""
+"""Defines the HBnB console."""
 import cmd
 import re
 from shlex import split
@@ -13,7 +13,7 @@ from models.amenity import Amenity
 from models.review import Review
 
 
-def custom_arg_parser(arg):
+def parse(arg):
     curly_braces = re.search(r"\{(.*?)\}", arg)
     brackets = re.search(r"\[(.*?)\]", arg)
     if curly_braces is None:
@@ -31,8 +31,8 @@ def custom_arg_parser(arg):
         return retl
 
 
-class HolbertonBnBCommand(cmd.Cmd):
-    """HolbertonBnB Command Line Interface
+class HBNBCommand(cmd.Cmd):
+    """Defines the HolbertonBnB command interpreter.
     Attributes:
         prompt (str): The command prompt.
     """
@@ -53,7 +53,7 @@ class HolbertonBnBCommand(cmd.Cmd):
         pass
 
     def default(self, arg):
-        """Default behavior for the command when input is invalid"""
+        """Default behavior for cmd module when input is invalid"""
         argdict = {
             "all": self.do_all,
             "show": self.do_show,
@@ -70,7 +70,7 @@ class HolbertonBnBCommand(cmd.Cmd):
                 if command[0] in argdict.keys():
                     call = "{} {}".format(argl[0], command[1])
                     return argdict[command[0]](call)
-        print("*** Invalid syntax: {}".format(arg))
+        print("*** Unknown syntax: {}".format(arg))
         return False
 
     def do_quit(self, arg):
@@ -84,72 +84,71 @@ class HolbertonBnBCommand(cmd.Cmd):
 
     def do_create(self, arg):
         """Usage: create <class>
-        Create a new instance of a class and print its ID.
+        Create a new class instance and print its id.
         """
-        argl = custom_arg_parser(arg)
+        argl = parse(arg)
         if len(argl) == 0:
-            print("** Class name missing **")
-        elif argl[0] not in HolbertonBnBCommand.__classes:
-            print("** Class doesn't exist **")
+            print("** class name missing **")
+        elif argl[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
         else:
-            new_instance = eval(argl[0])()
-            print(new_instance.id)
+            print(eval(argl[0])().id)
             storage.save()
 
     def do_show(self, arg):
-        """Usage: show <class> <id>
-        Display the string representation of a class instance with the given ID.
+        """Usage: show <class> <id> or <class>.show(<id>)
+        Display the string representation of a class instance of a given id.
         """
-        argl = custom_arg_parser(arg)
-        obj_dict = storage.all()
+        argl = parse(arg)
+        objdict = storage.all()
         if len(argl) == 0:
-            print("** Class name missing **")
-        elif argl[0] not in HolbertonBnBCommand.__classes:
-            print("** Class doesn't exist **")
+            print("** class name missing **")
+        elif argl[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
         elif len(argl) == 1:
-            print("** Instance ID missing **")
-        elif "{}.{}".format(argl[0], argl[1]) not in obj_dict:
-            print("** No instance found **")
+            print("** instance id missing **")
+        elif "{}.{}".format(argl[0], argl[1]) not in objdict:
+            print("** no instance found **")
         else:
-            print(obj_dict["{}.{}".format(argl[0], argl[1])])
+            print(objdict["{}.{}".format(argl[0], argl[1])])
 
     def do_destroy(self, arg):
-        """Usage: destroy <class> <id>
-        Delete a class instance with the given ID."""
-        argl = custom_arg_parser(arg)
-        obj_dict = storage.all()
+        """Usage: destroy <class> <id> or <class>.destroy(<id>)
+        Delete a class instance of a given id."""
+        argl = parse(arg)
+        objdict = storage.all()
         if len(argl) == 0:
-            print("** Class name missing **")
-        elif argl[0] not in HolbertonBnBCommand.__classes:
-            print("** Class doesn't exist **")
+            print("** class name missing **")
+        elif argl[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
         elif len(argl) == 1:
-            print("** Instance ID missing **")
-        elif "{}.{}".format(argl[0], argl[1]) not in obj_dict.keys():
-            print("** No instance found **")
+            print("** instance id missing **")
+        elif "{}.{}".format(argl[0], argl[1]) not in objdict.keys():
+            print("** no instance found **")
         else:
-            del obj_dict["{}.{}".format(argl[0], argl[1])]
+            del objdict["{}.{}".format(argl[0], argl[1])]
             storage.save()
 
     def do_all(self, arg):
-        """Usage: all or all <class>
-        Display string representations of instances of a given class.
+        """Usage: all or all <class> or <class>.all()
+        Display string representations of all instances of a given class.
         If no class is specified, displays all instantiated objects."""
-        argl = custom_arg_parser(arg)
-        if len(argl) > 0 and argl[0] not in HolbertonBnBCommand.__classes:
-            print("** Class doesn't exist **")
+        argl = parse(arg)
+        if len(argl) > 0 and argl[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
         else:
-            obj_list = []
+            objl = []
             for obj in storage.all().values():
                 if len(argl) > 0 and argl[0] == obj.__class__.__name__:
-                    obj_list.append(obj.__str__())
+                    objl.append(obj.__str__())
                 elif len(argl) == 0:
-                    obj_list.append(obj.__str__())
-            print(obj_list)
+                    objl.append(obj.__str__())
+            print(objl)
 
     def do_count(self, arg):
-        """Usage: count <class>
+        """Usage: count <class> or <class>.count()
         Retrieve the number of instances of a given class."""
-        argl = custom_arg_parser(arg)
+        argl = parse(arg)
         count = 0
         for obj in storage.all().values():
             if argl[0] == obj.__class__.__name__:
@@ -157,51 +156,54 @@ class HolbertonBnBCommand(cmd.Cmd):
         print(count)
 
     def do_update(self, arg):
-        """Usage: update <class> <id> <attribute_name> <attribute_value>
-        Update a class instance's attribute with a given value."""
-        argl = custom_arg_parser(arg)
-        obj_dict = storage.all()
+        """Usage: update <class> <id> <attribute_name> <attribute_value> or
+       <class>.update(<id>, <attribute_name>, <attribute_value>) or
+       <class>.update(<id>, <dictionary>)
+        Update a class instance of a given id by adding or updating
+        a given attribute key/value pair or dictionary."""
+        argl = parse(arg)
+        objdict = storage.all()
 
         if len(argl) == 0:
-            print("** Class name missing **")
+            print("** class name missing **")
             return False
-        if argl[0] not in HolbertonBnBCommand.__classes:
-            print("** Class doesn't exist **")
+        if argl[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
             return False
         if len(argl) == 1:
-            print("** Instance ID missing **")
+            print("** instance id missing **")
             return False
-        if "{}.{}".format(argl[0], argl[1]) not in obj_dict.keys():
-            print("** No instance found **")
+        if "{}.{}".format(argl[0], argl[1]) not in objdict.keys():
+            print("** no instance found **")
             return False
         if len(argl) == 2:
-            print("** Attribute name missing **")
+            print("** attribute name missing **")
             return False
         if len(argl) == 3:
             try:
                 type(eval(argl[2])) != dict
             except NameError:
-                print("** Value missing **")
+                print("** value missing **")
                 return False
 
         if len(argl) == 4:
-            obj = obj_dict["{}.{}".format(argl[0], argl[1])]
+            obj = objdict["{}.{}".format(argl[0], argl[1])]
             if argl[2] in obj.__class__.__dict__.keys():
-                val_type = type(obj.__class__.__dict__[argl[2]])
-                obj.__dict__[argl[2]] = val_type(argl[3])
+                valtype = type(obj.__class__.__dict__[argl[2]])
+                obj.__dict__[argl[2]] = valtype(argl[3])
             else:
                 obj.__dict__[argl[2]] = argl[3]
         elif type(eval(argl[2])) == dict:
-            obj = obj_dict["{}.{}".format(argl[0], argl[1])]
-            for key, value in eval(argl[2]).items():
-                if (key in obj.__class__.__dict__.keys() and
-                        type(obj.__class__.__dict__[key]) in {str, int, float}):
-                    val_type = type(obj.__class__.__dict__[key])
-                    obj.__dict__[key] = val_type(value)
+            obj = objdict["{}.{}".format(argl[0], argl[1])]
+            for k, v in eval(argl[2]).items():
+                if (k in obj.__class__.__dict__.keys() and
+                        type(obj.__class__.__dict__[k]) in {str, int, float}):
+                    valtype = type(obj.__class__.__dict__[k])
+                    obj.__dict__[k] = valtype(v)
                 else:
-                    obj.__dict__[key] = value
+                    obj.__dict__[k] = v
         storage.save()
 
 
 if __name__ == "__main__":
-    HolbertonBnBCommand().cmdloop()
+    HBNBCommand().cmdloop()
