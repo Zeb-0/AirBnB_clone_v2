@@ -34,10 +34,8 @@ class TestAmenity(unittest.TestCase):
         """Resets tests"""
         try:
             os.remove("file.json")
-        except FileNotFoundError:
+        except:
             pass
-        except Exception as e:
-            print("An error occurred:", e)
 
     def test_object_instantiation(self):
         """Instantiates class"""

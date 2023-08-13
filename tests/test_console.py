@@ -7,11 +7,15 @@ from models import storage
 from unittest.mock import patch
 from console import HBNBCommand
 
+
 class TestConsole(unittest.TestCase):
 
     def setUp(self):
         self.console = HBNBCommand()
-        self.model_classes = ["BaseModel", "User", "Place", "State", "City", "Amenity", "Review"]
+        self.model_classes = [
+                "BaseModel", "User", "Place",
+                "State", "City", "Amenity", "Review"
+                ]
 
     def tearDown(self):
         self.console = None
@@ -108,11 +112,13 @@ class TestConsole(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as v:
             HBNBCommand().onecmd('show BaseModel')
             self.assertFalse(v.getvalue() == "** instance id missing **")
-    
+
     def test_help_show(self):
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             with patch('builtins.input', side_effect=['help show', 'EOF']):
                 self.console.cmdloop()
                 self.assertFalse("Show command" in mock_stdout.getvalue())
+
+
 if __name__ == '__main__':
     unittest.main()

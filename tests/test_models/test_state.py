@@ -40,10 +40,8 @@ class TestStateInstantiation(unittest.TestCase):
         """
         try:
             os.remove("file.json")
-        except FileNotFoundError:
+        except:
             pass
-        except Exception as e:
-            print("An error occurred:", e)
 
     def test_init_arg(self):
         """pass in arg to new instance"""
