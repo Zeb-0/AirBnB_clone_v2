@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Holberton AirBnB Console """
+""" Module console.py - a command-line interface for Holberton AirBnB """
 import cmd
 import sys
 import json
