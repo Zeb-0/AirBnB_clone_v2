@@ -1,118 +1,153 @@
 #!/usr/bin/python3
-"""Unit tests for the HBNBCommand class in the console (command interpreter).
-"""
-import unittest
-from io import StringIO
+"""Module console.py - a command-line interface for Holberton AirBnB"""
+import cmd
+import sys
 from models import storage
-from unittest.mock import patch
-from console import HBNBCommand
+from models.base_model import BaseModel
+from models.user import User
+from models.place import Place
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 
-class TestConsole(unittest.TestCase):
 
-    def setUp(self):
-        self.console = HBNBCommand()
-        self.model_classes = ["BaseModel", "User", "Place", "State", "City", "Amenity", "Review"]
+class HBNBCommand(cmd.Cmd):
+    """General Class for HBNBCommand"""
+    prompt = '(hbnb) '
+    classes = {
+        'BaseModel': BaseModel,
+        'User': User,
+        'City': City,
+        'Place': Place,
+        'Amenity': Amenity,
+        'Review': Review,
+        'State': State
+    }
 
-    def tearDown(self):
-        self.console = None
+    def do_quit(self, arg):
+        """Exit method for quit typing"""
+        exit()
 
-    def test_quit(self):
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            self.console.onecmd("quit")
-            self.assertEqual(mock_stdout.getvalue().strip(), "")
+    def do_EOF(self, arg):
+        """Exit method for EOF"""
+        print('')
+        exit()
 
-    def test_EOF(self):
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            self.console.onecmd("EOF")
-            self.assertEqual(mock_stdout.getvalue().strip(), "")
+    def emptyline(self):
+        """Method to pass when emptyline entered"""
+        pass
 
-    def test_emptyline(self):
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            self.console.onecmd("")
-            self.assertEqual(mock_stdout.getvalue().strip(), "")
+    def do_create(self, arg):
+        """Create a new instance"""
+        if len(arg) == 0:
+            print('** class name missing **')
+            return
 
-    def test_create(self):
-        for model_class in self.model_classes:
-            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-                self.console.onecmd(f"create {model_class}")
-                self.assertTrue(len(mock_stdout.getvalue().strip()) == 36)
+        new = None
+        if arg in self.classes:
+            new = self.classes[arg]()
+            new.save()
+            print(new.id)
+        else:
+            print("** class doesn't exist **")
 
-    def test_destroy(self):
-        for model_class in self.model_classes:
-            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-                self.console.onecmd(f"create {model_class}")
-                obj_id = mock_stdout.getvalue().strip()
-                self.console.onecmd(f"destroy {model_class} {obj_id}")
-                self.assertFalse(len(mock_stdout.getvalue().strip()) == 0)
+    def do_show(self, arg):
+        """Method to print instance"""
+        if len(arg) == 0:
+            print('** class name missing **')
+            return
 
-    def test_all(self):
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            self.console.onecmd("create BaseModel")
-            self.console.onecmd("create User")
-            self.console.onecmd("all")
-            self.assertTrue("BaseModel" in mock_stdout.getvalue().strip())
-            self.assertTrue("User" in mock_stdout.getvalue().strip())
+        class_name, instance_id = arg.split()[0], None
+        if class_name not in self.classes:
+            print("** class doesn't exist **")
+            return
 
-    # Add the remaining test methods from the second file here
+        if len(arg.split()) > 1:
+            instance_id = arg.split()[1]
+            key = f"{class_name}.{instance_id}"
+            if key in storage.all():
+                instance = storage.all()[key]
+                print(instance)
+            else:
+                print('** no instance found **')
+        else:
+            print('** instance id missing **')
 
-    def test_alt_all(self):
-        ''' test [class].all method '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create User')
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('User.all()')
-            self.assertTrue(len(v.getvalue()) > 0)
+    def do_destroy(self, arg):
+        """Method to delete instance with class and id"""
+        if len(arg) == 0:
+            print("** class name missing **")
+            return
 
-    def test_count(self):
-        ''' test [class].count method '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('User.count()')
-            self.assertTrue(int(v.getvalue()) >= 0)
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create User')
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('User.count()')
-            self.assertTrue(int(v.getvalue()) >= 1)
+        class_name, instance_id = arg.split()[0], None
+        if class_name not in self.classes:
+            print("** class doesn't exist **")
+            return
 
-    def test_user(self):
-        ''' test user object with console '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create User')
-            user_id = v.getvalue()
-            self.assertTrue(user_id != "** class doesn't exist **\n")
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('show User')
-            self.assertTrue(v.getvalue() != "** no instance found **\n")
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('all User')
-            self.assertTrue(v.getvalue() != "** class doesn't exist **\n")
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd("update User " + user_id + " name betty")
-            HBNBCommand().onecmd("show User " + user_id)
-            self.assertTrue("betty" in v.getvalue())
-            HBNBCommand().onecmd("destroy User " + user_id)
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd("show User "+user_id)
-            self.assertEqual(v.getvalue(), "** no instance found **\n")
+        if len(arg.split()) > 1:
+            instance_id = arg.split()[1]
+            key = f"{class_name}.{instance_id}"
+            if key in storage.all():
+                storage.all().pop(key)
+                storage.save()
+            else:
+                print('** no instance found **')
+        else:
+            print('** instance id missing **')
 
-    def test_class_exist(self):
-        ''' test class name exist '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create BaseModel')
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('all FakeClass')
-            self.assertTrue(v.getvalue() == "** class doesn't exist **\n")
+    def do_all(self, arg):
+        """Method to print all instances"""
+        instances = []
 
-    def test_show_id(self):
-        ''' test show id '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('show BaseModel')
-            self.assertFalse(v.getvalue() == "** instance id missing **")
-    
+        if len(arg) == 0:
+            instances = [str(a) for a in storage.all().values()]
+        elif arg in self.classes:
+            instances = [str(a) for b, a in storage.all().items() if arg in b]
+        else:
+            print("** class doesn't exist **")
+            return
+
+        print(instances)
+
+    def do_update(self, arg):
+        """Method to update JSON file"""
+        arg = arg.split()
+        if len(arg) == 0:
+            print('** class name missing **')
+            return
+
+        class_name, instance_id = arg[0], None
+        if class_name not in self.classes:
+            print("** class doesn't exist **")
+            return
+
+        if len(arg) == 1:
+            print('** instance id missing **')
+            return
+        else:
+            instance_id = arg[1]
+            key = f"{class_name}.{instance_id}"
+            if key in storage.all():
+                if len(arg) > 2:
+                    if len(arg) == 3:
+                        print('** value missing **')
+                    else:
+                        setattr(
+                            storage.all()[key],
+                            arg[2],
+                            arg[3][1:-1])
+                        storage.all()[key].save()
+                else:
+                    print('** attribute name missing **')
+            else:
+                print('** no instance found **')
+
     def test_help_show(self):
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             with patch('builtins.input', side_effect=['help show', 'EOF']):
                 self.console.cmdloop()
                 self.assertFalse("Show command" in mock_stdout.getvalue())
+
 if __name__ == '__main__':
-    unittest.main()
+    HBNBCommand().cmdloop()
