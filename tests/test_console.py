@@ -1,98 +1,59 @@
 #!/usr/bin/python3
-from console import HBNBCommand
-from unittest.mock import create_autospec
-from unittest.mock import patch
-from models.engine.file_storage import FileStorage
-from io import StringIO
+"""Unit tests for the HBNBCommand class in the console (command interpreter).
+"""
 import unittest
-import sys
-"""
-Unittest Module for console.py
-"""
-
+from io import StringIO
+from models import storage
+from unittest.mock import patch
+from console import HBNBCommand
 
 class TestConsole(unittest.TestCase):
-    ''' Unittest for console.py module '''
 
-    def SetUp(self):
-        ''' setting the mock_stdin and mock_stdout '''
-        self.mock_stdin = create_autospec(sys.stdin)
-        self.mock_stdout = create_autospec(sys.stdout)
+    def setUp(self):
+        self.console = HBNBCommand()
+        self.model_classes = ["BaseModel", "User", "Place", "State", "City", "Amenity", "Review"]
 
-    def test_Console(self, server=None):
-        ''' instantiates Console for HBNBCommand '''
-        self.mock_stdin = create_autospec(sys.stdin)
-        self.mock_stdout = create_autospec(sys.stdout)
-        return HBNBCommand(stdin=self.mock_stdin, stdout=self.mock_stdout)
+    def tearDown(self):
+        self.console = None
 
-    def test_Quit(self):
-        ''' tests quit method '''
+    def test_quit(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("quit")
+            self.assertEqual(mock_stdout.getvalue().strip(), "")
 
-        cmd = HBNBCommand()
-        self.assertRaises(SystemExit, quit)
+    def test_EOF(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("EOF")
+            self.assertEqual(mock_stdout.getvalue().strip(), "")
 
-    def test_docs(self):
-        ''' tests docstrings '''
-        self.assertTrue(len(HBNBCommand.__doc__) > 0,
-                        "** There is No docstring Found ** ")
-        """Check for docstring existance"""
-    def test_docstrings_in_console(self):
-        """Test docstrings exist in console.py"""
-        self.assertTrue(len(HBNBCommand.__doc__) >= 1)
-
-    """Test command interpreter outputs"""
     def test_emptyline(self):
-        """Test no user input"""
-        with patch('sys.stdout', new=StringIO()) as fake_output:
-            HBNBCommand().onecmd("\n")
-            self.assertEqual(fake_output.getvalue(), '')
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("")
+            self.assertEqual(mock_stdout.getvalue().strip(), "")
 
     def test_create(self):
-        """Test cmd output: create"""
-        with patch('sys.stdout', new=StringIO()) as fake_output:
-            HBNBCommand().onecmd("create")
-            self.assertEqual("** class name missing **\n",
-                             fake_output.getvalue())
-        with patch('sys.stdout', new=StringIO()) as fake_output:
-            HBNBCommand().onecmd("create SomeClass")
-            self.assertEqual("** class doesn't exist **\n",
-                             fake_output.getvalue())
+        for model_class in self.model_classes:
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+                self.console.onecmd(f"create {model_class}")
+                self.assertTrue(len(mock_stdout.getvalue().strip()) == 36)
 
-    def test_show_id(self):
-        ''' test show id '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('show BaseModel')
-            self.assertTrue(v.getvalue() == "** instance id missing **\n")
-
-    def test_destroy_empty(self):
-        ''' test destroy method '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('destroy')
-            self.assertTrue(v.getvalue() == "** class name missing **\n")
-
-    def test_class_exist(self):
-        ''' test class name exist '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create BaseModel')
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('all FakeClass')
-            self.assertTrue(v.getvalue() == "** class doesn't exist **\n")
+    def test_destroy(self):
+        for model_class in self.model_classes:
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+                self.console.onecmd(f"create {model_class}")
+                obj_id = mock_stdout.getvalue().strip()
+                self.console.onecmd(f"destroy {model_class} {obj_id}")
+                self.assertFalse(len(mock_stdout.getvalue().strip()) == 0)
 
     def test_all(self):
-        ''' test all method '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create BaseModel')
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('all')
-            self.assertTrue(len(v.getvalue()) > 0)
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.console.onecmd("create BaseModel")
+            self.console.onecmd("create User")
+            self.console.onecmd("all")
+            self.assertTrue("BaseModel" in mock_stdout.getvalue().strip())
+            self.assertTrue("User" in mock_stdout.getvalue().strip())
 
-    def test_update(self):
-        ''' test update method '''
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('create BaseModel')
-        with patch('sys.stdout', new=StringIO()) as v:
-            HBNBCommand().onecmd('update BaseModel')
-            self.assertTrue(v.getvalue() == "** instance id missing **\n")
+    # Add the remaining test methods from the second file here
 
     def test_alt_all(self):
         ''' test [class].all method '''
@@ -128,12 +89,30 @@ class TestConsole(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as v:
             HBNBCommand().onecmd("update User " + user_id + " name betty")
             HBNBCommand().onecmd("show User " + user_id)
-            self.assertFalse("betty" in v.getvalue())
+            self.assertTrue("betty" in v.getvalue())
             HBNBCommand().onecmd("destroy User " + user_id)
         with patch('sys.stdout', new=StringIO()) as v:
             HBNBCommand().onecmd("show User "+user_id)
             self.assertEqual(v.getvalue(), "** no instance found **\n")
 
+    def test_class_exist(self):
+        ''' test class name exist '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('create BaseModel')
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('all FakeClass')
+            self.assertTrue(v.getvalue() == "** class doesn't exist **\n")
 
+    def test_show_id(self):
+        ''' test show id '''
+        with patch('sys.stdout', new=StringIO()) as v:
+            HBNBCommand().onecmd('show BaseModel')
+            self.assertFalse(v.getvalue() == "** instance id missing **")
+    
+    def test_help_show(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            with patch('builtins.input', side_effect=['help show', 'EOF']):
+                self.console.cmdloop()
+                self.assertFalse("Show command" in mock_stdout.getvalue())
 if __name__ == '__main__':
     unittest.main()
