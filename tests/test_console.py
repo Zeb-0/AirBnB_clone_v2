@@ -115,3 +115,4 @@ class TestConsole(unittest.TestCase):
                 self.console.cmdloop()
                 self.assertFalse("Show command" in mock_stdout.getvalue())
 if __name__ == '__main__':
+    unittest.main()
