@@ -1,0 +1,87 @@
+/* Improve color contrast for better readability */
+body {
+    color: #333;
+    background-color: #FFF;
+}
+
+/* Adjust font size and line height for better readability */
+h3, h4 {
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+/* Improve contrast for links */
+a {
+    color: #FF5A5F;
+    text-decoration: underline;
+}
+
+/* Add padding and margin for better spacing */
+.filters {
+    padding: 20px;
+    margin: 0;
+}
+
+.locations,
+.amenities,
+.search {
+    padding: 20px;
+    margin: 0;
+}
+
+/* Increase spacing between list items */
+.locations h4,
+.amenities h4 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+/* Provide alternative text for icons */
+.icon_tv::before {
+    content: "TV Icon";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url('images/icon_tv.png');
+    background-size: cover;
+    margin-right: 5px;
+}
+
+.icon_wifi::before {
+    content: "WiFi Icon";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url('images/icon_wifi.png');
+    background-size: cover;
+    margin-right: 5px;
+}
+
+.icon_pets::before {
+    content: "Pets Icon";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url('images/icon_pets.png');
+    background-size: cover;
+    margin-right: 5px;
+}
+
+/* Adjust button styles for better contrast and focus */
+button {
+    font-size: 18px;
+    background-color: #FF5A5F;
+    color: #FFFFFF;
+    height: 48px;
+    width: 20%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+button:hover,
+button:focus {
+    opacity: 0.9;
+    outline: none;
+}

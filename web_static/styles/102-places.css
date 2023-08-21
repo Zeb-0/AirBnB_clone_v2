@@ -1,0 +1,91 @@
+/* styles/102-places.css */
+
+/* Adjust the places section for responsiveness */
+.places {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0 20px; /* Add horizontal spacing */
+    box-sizing: border-box;
+}
+
+/* Adjust the article containers */
+.article {
+    width: 100%; /* Make them take up full width on smaller screens */
+    padding: 20px;
+    margin: 20px 0; /* Add vertical spacing */
+    border: 1px solid #FF5A5F;
+    border-radius: 4px;
+}
+
+/* Style the title of place */
+.title_of_place {
+    font-size: 24px; /* Decrease font size for responsiveness */
+    margin-bottom: 10px;
+}
+
+/* Style the price by night container */
+.price_by_night {
+    min-width: 50px; /* Adjust the minimum width for responsiveness */
+    height: 50px;
+    font-size: 20px;
+    line-height: 50px;
+}
+
+/* Adjust the information container */
+.information {
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    justify-content: space-between;
+    height: auto; /* Adjust height for variable content */
+    border-top: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD;
+    margin-top: 10px;
+    padding: 10px 0; /* Add vertical spacing */
+}
+
+/* Adjust the max_guest, number_rooms, and number_bathrooms containers */
+.max_guest,
+.number_rooms,
+.number_bathrooms {
+    width: 100%; /* Make them take up full width on smaller screens */
+    margin: 5px 0; /* Add spacing between items */
+}
+
+/* Style the icon images */
+.icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 24px; /* Adjust icon height */
+    width: 24px; /* Adjust icon width */
+}
+
+/* Adjust user and description containers */
+.user,
+.description {
+    text-align: left; /* Align text to the left on smaller screens */
+    margin: 10px 0; /* Add vertical spacing */
+}
+
+/* Adjust amenities container */
+.amenities {
+    text-align: left; /* Align text to the left on smaller screens */
+    margin: 20px 0; /* Add vertical spacing */
+    padding-left: 0; /* Reset left padding */
+}
+
+/* Adjust amenities list items */
+.amenities ul li {
+    padding-left: 0; /* Reset left padding */
+    margin: 5px 0; /* Add spacing between items */
+}
+
+/* Adjust reviews container */
+.reviews {
+    text-align: left; /* Align text to the left on smaller screens */
+    margin: 20px 0; /* Add vertical spacing */
+}
+
+/* Adjust reviews list items */
+.reviews ul li {
+    margin: 10px 0; /* Add vertical spacing */
+}

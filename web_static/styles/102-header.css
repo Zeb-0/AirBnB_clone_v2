@@ -1,0 +1,16 @@
+/* Adjust logo size and alignment for smaller screens */
+.logo {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Reduce header height and adjust background position for smaller screens */
+header {
+    padding: 10px 0;
+    height: 50px; /* You can adjust this height as needed */
+    background: white url(../images/Hbnb_logo.png);
+    background-repeat: no-repeat;
+    background-position: 10px center; /* Adjust the position for better alignment */
+    flex-shrink: 0;
+    border-bottom: 1px solid #CCCCCC;
+}
