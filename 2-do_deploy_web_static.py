@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Fab script that distributes an archive to a web server.
+# Fabfile script that distributes an archive to a web server.
 import os.path
 from fabric.api import env
 from fabric.api import put
